@@ -50,3 +50,26 @@ shadcn/ui 기반 Next.js App Router 스타터킷이며, UI 문구는 모두 한�
 `hooks/use-mobile.ts`는 `getServerSnapshot`을 갖춘 `useSyncExternalStore`를 사용하므로 구조적으로 SSR-safe합니다. `hooks/use-breakpoint.ts`는 태블릿/데스크톱 판별을 위해 `usehooks-ts`의 `useMediaQuery`를 감싸는데, 반드시 `{ initializeWithValue: false }` 옵션과 함께 호출해야 합니다 — 그렇지 않으면 클라이언트의 첫 렌더가 실제 `matchMedia` 값을 읽어버리는 반면 서버는 항상 기본값을 렌더링해 hydration mismatch가 발생합니다. 새로운 미디어 쿼리 기반 훅을 추가할 때도 동일한 규칙을 적용하세요.
 
 마찬가지로, 서버에서 렌더링되는 코드에서는 로케일을 고정하지 않은 `Date.prototype.toLocaleDateString()`/`toLocaleString()` 사용을 피하세요(예: `components/ui/calendar.tsx`는 대신 고정 토큰을 사용하는 `date-fns`의 `format()`을 사용합니다) — 서버와 브라우저가 서로 다른 기본 로케일을 사용할 경우 SSR/CSR 출력이 어긋날 수 있습니다.
+
+## Claude Code 도구
+
+### 서브에이전트 (`.claude/agents/`)
+
+| 에이전트 | 사용 시점 |
+|---|---|
+| `code-reviewer` | 코드 구현/수정 직후 **PROACTIVELY** 사용 — 사용자가 요청하지 않아도 작업 완료 시 자동으로 호출해 정확성·보안·이 프로젝트 관례(radix-ui, Tailwind v4 토큰, 폼/테이블 패턴) 준수를 검토 |
+| `nextjs-app-developer` | App Router 구조 설계, 페이지 스캐폴딩, 라우팅/레이아웃 아키텍처 |
+| `ui-markup-specialist` | 정적 마크업·스타일링 전용 작업(비즈니스 로직/인터랙션 제외) |
+| `nextjs-supabase-expert` | Supabase 연동(인증, DB 쿼리, 미들웨어) — 이 스타터킷엔 아직 Supabase가 설치되어 있지 않음 |
+| `notion-api-database-expert` | Notion API 데이터베이스 연동 |
+| `starter-cleaner` | 스타터킷 보일러플레이트/예제 코드 제거 및 초기화 |
+| `development-planner` | `ROADMAP.md` 작성·갱신 |
+| `prd-generator` / `prd-validator` | PRD 작성 및 기술적 타당성 검증 |
+
+### 슬래시 커맨드 (`.claude/commands/`)
+
+`/git:commit`, `/git:branch`, `/git:merge`, `/git:pr`, `/docs:update-roadmap`가 정의되어 있습니다. 커밋은 `<이모지> <타입>: <설명>` 형식(gitmoji + conventional commit, 예: `✨ feat: ...`)을 따르므로, 커맨드 없이 직접 `git commit`할 때도 동일한 포맷을 유지하세요.
+
+### MCP 서버 (`.mcp.json`)
+
+`context7`(라이브러리 문서 조회), `shadcn`(컴포넌트 검색/설치 — 새 UI 프리미티브 추가 시 `npx shadcn add` 대신 활용 가능), `playwright`(UI 변경 후 브라우저 검증), `sequential-thinking`(복잡한 설계/계획 작업)이 등록되어 있습니다.
